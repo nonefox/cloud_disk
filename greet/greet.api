@@ -1,0 +1,283 @@
+service greet-api {
+	//用户登录
+	@handler UserLogin
+	post /user/login(LoginRequest) returns (LoginResponse)//配置请求方式，路径，请求结构，响应结构（可以生成逻辑代码模板）
+	
+	//用户详情
+	@handler UserDetail
+	get /user/detail(UserDetailRequest) returns (UserDetailResponse)
+	
+	//发送邮箱验证码
+	@handler SendCode
+	post /mail/code/send/register(SendCodeRequest) returns (SendCodeResponse)
+	
+	//用户注册
+	@handler UserRegister
+	post /user/register(UserRegisterRequest) returns (UserRegisterResponse)
+	
+	//获取资源详情
+	@handler ShareBasicDetail
+	get /share/basic/detail(ShareBasicDetailRequest) returns (ShareBasicDetailResponse)
+}
+
+//为后面的服务加一个中间件服务，需要用户验证之后才可以进行下面的操作
+@server (
+	middleware: Auth
+)
+service greet-api{
+	//文件上传
+	@handler FileUpload
+	post /file/upload(FileUploadRequest) returns (FileUploadResponse)
+	
+	//用户存储关系
+	@handler UserRepositoryRelation
+	post /user/repository/relation(UserRepositoryRelationRequest) returns (UserRepositoryRelationResponse)
+	
+	//用户文件列表
+	@handler UserFileList
+	post /user/file/list(UserFileListRequest) returns (UserFileListResponse)
+	
+	//用户文件名修改
+	@handler UserFileNameChange
+	post /user/file/name/change(UserFileNameChangeRequest) returns (UserFileNameChangeResponse)
+	
+	//用户创建文件夹
+	@handler UserFolderCreate
+	post /user/folder/create(UserFolderCreateRequest) returns (UserFolderCreateResponse)
+	
+	//用户文件删除
+	@handler UserFileDelete
+	delete /user/file/delete(UserFileDeleteRequest) returns (UserFileDeleteResponse)
+	
+	//用户文件移动
+	@handler UserFileMove
+	put /user/file/move(UserFileMoveRequest) returns (UserFileMoveResponse)
+	
+	//用户分享创建
+	@handler UserShareCreate
+	post /user/share/create(UserShareCreateRequest) returns (UserShareCreateResponse)
+	
+	//用户分享保存
+	@handler UserShareSave
+	post  /user/share/save(UserShareSaveRequest) returns (UserShareSaveResponse)
+	
+	//刷新Authorization
+	@handler RefreshToken
+	post /refresh/token(RefreshTokenRequest) returns (RefreshTokenResponse)
+	
+	//文件快传
+	@handler FileUploadQuick
+	post /file/upload/quick(FileUploadQuickRequest) returns (FileUploadQuickResponse)
+	
+	//文件分片上传
+	@handler FileUploadChunk
+	post /file/upload/chunk(FileUploadChunkRequest) returns (FileUploadChunkResponse)
+	
+	//文件分片上传完成
+	@handler FileUploadChunkComplete
+	post /file/upload/chunk/complete(FileUploadChunkCompleteRequest) returns (FileUploadChunkCompleteResponse)
+	
+}
+
+//用户登录
+type LoginRequest {
+	Name     string `json:"name"`
+	Password string `json:"password"`
+}
+
+type LoginResponse {
+	Token        string `json:"token"`
+	RefreshToken string `json:"refresh_token"` //刷新后的token
+}
+
+//用户详情
+type UserDetailRequest { //通过用户的Identity
+	Identity string `json:"identity"`
+}
+
+type UserDetailResponse {
+	Name  string `json:"name"`
+	Email string `json:"email"`
+}
+
+//发送邮箱验证码
+type SendCodeRequest {
+	Email string `json:"email"`
+}
+
+type SendCodeResponse{}
+
+//用户注册
+type UserRegisterRequest {
+	Name     string `json:"name"`     //用户名
+	Password string `json:"password"` //密码
+	Email    string `json:"email"`
+	Code     string `json:"code"` //邮箱验证码
+}
+
+type UserRegisterResponse {}
+
+//文件上传
+type FileUploadRequest {
+	Hash string `json:"hash,optional"`
+	Name string `json:"name,optional"`
+	Ext  string `json:"ext,optional"`
+	Size int64  `json:"size,optional"`
+	Path string `json:"path,optional"`
+}
+
+type FileUploadResponse {
+	Identity string `json:"identity"`
+	Ext      string `json:"ext"`
+	Name     string `json:"name"`
+}
+
+//用户存储关系
+type UserRepositoryRelationRequest {
+	ParentId           int64  `json:"parent_id"` //记录父文件ID
+	RepositoryIdentity string `json:"repository_identity"`
+	Ext                string `json:"ext"`
+	Name               string `json:"name"`
+}
+
+type UserRepositoryRelationResponse {}
+
+//用户文件列表
+type UserFileListRequest {
+	Identity string `json:"identity,optional"`
+	Page     int    `json:"page,optional"`
+	Size     int    `json:"size,optional"`
+}
+
+type UserFileListResponse {
+	List  []*UserFile `json:"list"` //用户文件信息的切片
+	Count int64       `json:"count"`
+}
+
+type UserFile {
+	Id                 int64  `json:"id"`
+	Identity           string `json:"identity"`
+	RepositoryIdentity string `json:"repository_identity"`
+	Name               string `json:"name"`
+	Ext                string `json:"ext"`
+	Path               string `json:"path"`
+	Size               int64  `json:"size"`
+}
+
+//用户修改文件名
+type UserFileNameChangeRequest {
+	Identity string `json:"identity"`
+	Name     string `json:"name"`
+}
+
+type UserFileNameChangeResponse {}
+
+//用户创建文件夹
+type UserFolderCreateRequest {
+	ParentId int64  `json:"parent_id"`
+	Name     string `json:"name"`
+}
+
+type UserFolderCreateResponse {
+	Identity string `json:"identity"`
+}
+
+//用户文件删除
+type UserFileDeleteRequest {
+	Identity string `json:"identity"`
+}
+
+type UserFileDeleteResponse {}
+
+//用户文件移动文件夹
+type UserFileMoveRequest {
+	Idnetity       string `json:"identity"`
+	ParentIdnetity string `json:"parent_identity"`
+}
+
+type UserFileMoveResponse{}
+
+//用户分享创建
+type UserShareCreateRequest {
+	UserRepositoryIdentity string `json:"user_repository_identity"`
+	ExpiredTime            int    `json:"expired_time"`
+}
+
+type UserShareCreateResponse {
+	Identity string `json:"identity"`
+}
+
+//获取资源详情
+type ShareBasicDetailRequest {
+	Identity string `json:"identity,optional"`
+}
+
+type ShareBasicDetailResponse {
+	RepositoryIdentity string `json:"repository_identity"` //资源文件identity
+	Name               string `json:"name"`
+	Ext                string `json:"ext"`
+	Size               int64  `json:"size"`
+	Path               string `json:"path"`
+}
+
+//用户分享保存
+type UserShareSaveRequest {
+	RepositoryIdentity string `json:"repository_identity"`
+	ParentId           int64  `json:"parent_id"` //父级目录id
+}
+
+type UserShareSaveResponse {
+	Identity string `json:"identity"` //用户文件关联表identity
+}
+
+//刷新token
+type RefreshTokenRequest {}
+
+type RefreshTokenResponse {
+	Token        string `json:"token"`
+	RefreshToken string `json:"refresh_token"`
+}
+
+//文件快传
+type FileUploadQuickRequest {
+	Md5      string `json:"md5"` //文件的md5值
+	Name     string `json:"name"`
+	Ext      string `json:"ext"`
+	ParentId int64  `json:"parent_id"` //父级目录id
+}
+
+type FileUploadQuickResponse {
+	Identity string `json:"identity"` //文件的repository_pool的id
+	UploadId string `json:"upload_id"`
+	Key      string `json:"key"`
+}
+
+//文件分片上传
+type FileUploadChunkRequest {
+	//前端需要在formdata中上传这些数据过来 formdata：key，upload_id，part_number（我们这里就不需要定义，直接获取就可以了）
+}
+
+type FileUploadChunkResponse {
+	Etag string `json:"etag"` // MD5
+}
+
+//文件分片上传完成
+type FileUploadChunkCompleteRequest {
+	Md5        string      `json:"md5"`
+	Name       string      `json:"name"`
+	Ext        string      `json:"ext"`
+	Size       int64       `json:"size"`
+	ParentId   int64       `json:"parent_id"` //父级目录id
+	Key        string      `json:"key"`
+	UploadId   string      `json:"upload_id"`
+	CosObjects []CosObject `json:"cos_objects"` //每个分块文件的校验结构
+}
+
+type CosObject {
+	PartNumber int    `json:"part_number"`
+	Etag       string `json:"etag"`
+}
+
+type FileUploadChunkCompleteResponse {
+	Identity string `json:"identity"` // 用户中新文件存储池identity
+}

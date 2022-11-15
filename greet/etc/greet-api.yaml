@@ -1,0 +1,9 @@
+Name: greet-api
+Host: 0.0.0.0
+Port: 8888
+
+Mysql:
+  DataSource: root:123456@tcp(192.168.88.101:3306)/cloud_disk?charset=utf8
+
+Redis:
+  Addr: 192.168.88.101:6379
