@@ -77,6 +77,9 @@ service greet-api{
 	@handler FileUploadChunkComplete
 	post /file/upload/chunk/complete(FileUploadChunkCompleteRequest) returns (FileUploadChunkCompleteResponse)
 	
+	//文件下载
+	@handler FileDownload
+	post /file/download(FileDownloadRequest) returns (FileDownloadResponse)
 }
 
 //用户登录
@@ -280,4 +283,13 @@ type CosObject {
 
 type FileUploadChunkCompleteResponse {
 	Identity string `json:"identity"` // 用户中新文件存储池identity
+}
+
+//文件下载
+type FileDownloadRequest {
+	Identity string `json:"identity"` //文件的identity
+}
+
+type FileDownloadResponse {
+	FileDir string `json:"file_dir"` //文件本地路径
 }

@@ -1,7 +1,6 @@
 package define
 
 import (
-	"cloud_disk/greet/initialize"
 	"github.com/golang-jwt/jwt/v4"
 	"os"
 )
@@ -29,7 +28,7 @@ type UserClaim struct {
 var TenSecretID = os.Getenv("TencentSecretID")
 var TenSecretKey = os.Getenv("TencentSecretKey")
 var TenCosURL = "https://examplebucket-1250000000.cos.ap-guangzhou.myqcloud.com" //使用自己的
-var TenCosClient = initialize.InitTenCosClient()
+//var TenCosClient = initialize.InitTenCosClient()
 
 // PageSize 分页的默认参数
 var PageSize = 10

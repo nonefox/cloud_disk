@@ -3,6 +3,7 @@ package tools
 import (
 	"bytes"
 	"cloud_disk/greet/define"
+	"cloud_disk/greet/initialize"
 	"context"
 	"crypto/md5"
 	"crypto/tls"
@@ -144,7 +145,7 @@ func InitTenCosPart(ext string) (string, string, error) {
 	//设置上传到的文件夹和文件名
 	key := "cloud_disk/" + GetUUID() + ext
 	//TenCOsClient我们定义到initialize中，统一获取
-	v, _, err := define.TenCosClient.Object.InitiateMultipartUpload(context.Background(), key, nil)
+	v, _, err := initialize.InitTenCosClient().Object.InitiateMultipartUpload(context.Background(), key, nil)
 	if err != nil {
 		log.Printf("初始化tencentCOS分片失败：%v", err)
 		return "", "", err
@@ -184,7 +185,7 @@ func TenCosPartUpload(r *http.Request) (string, error) {
 	io.Copy(buf, file)
 
 	// opt可选
-	resp, err := define.TenCosClient.Object.UploadPart( //上传分片
+	resp, err := initialize.InitTenCosClient().Object.UploadPart( //上传分片
 		context.Background(), key, UploadID, partNumber, bytes.NewReader(buf.Bytes()), nil,
 	)
 	if err != nil {
@@ -202,11 +203,33 @@ func TenCosPartUploadComplete(key, UploadID string, objects []cos.Object) error 
 	opt := &cos.CompleteMultipartUploadOptions{}
 	//把所有分片PartNumber和ETag，用来校验块的准确性
 	opt.Parts = append(opt.Parts, objects...)
-	_, _, err := define.TenCosClient.Object.CompleteMultipartUpload(
+	_, _, err := initialize.InitTenCosClient().Object.CompleteMultipartUpload(
 		context.Background(), key, UploadID, opt,
 	)
 	if err != nil {
 		return err
 	}
 	return nil
+}
+
+// TenCosDownload 用户文件下载
+func TenCosDownload(key, fileName string) (string, error) {
+	//用户需要下载的文件
+	//key := "cloud_disk/tests.mp4"
+	//file := "./target.mp4"
+
+	file := "./" + fileName
+	opt := &cos.MultiDownloadOptions{
+		ThreadPoolSize: 2,
+	}
+	_, err := initialize.InitTenCosClient().Object.Download(
+		context.Background(), key, file, opt,
+	)
+	if err != nil {
+		log.Printf("下载文件失败：%v", err)
+		return "", nil
+	}
+	dir, _ := os.Getwd()
+	//返回文件下载路径
+	return dir + "\\" + fileName, nil
 }

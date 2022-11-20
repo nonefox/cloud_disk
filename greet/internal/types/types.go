@@ -38,7 +38,7 @@ type UserRegisterResponse struct {
 }
 
 type FileUploadRequest struct {
-	Hash string `json:"hash,optional"` //文件的MD5值
+	Hash string `json:"hash,optional"`
 	Name string `json:"name,optional"`
 	Ext  string `json:"ext,optional"`
 	Size int64  `json:"size,optional"`
@@ -190,4 +190,12 @@ type CosObject struct {
 
 type FileUploadChunkCompleteResponse struct {
 	Identity string `json:"identity"` // 用户中新文件存储池identity
+}
+
+type FileDownloadRequest struct {
+	Identity string `json:"identity"` //文件的identity
+}
+
+type FileDownloadResponse struct {
+	FileDir string `json:"file_dir"` //文件本地路径
 }
